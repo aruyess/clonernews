@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ClonerNews</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>ClonerNews</h1>
+    <nav>
+      <button data-feed="newstories" class="active">New</button>
+      <button data-feed="topstories">Top</button>
+      <button data-feed="askstories">Ask</button>
+      <button data-feed="showstories">Show</button>
+      <button data-feed="jobstories">Jobs</button>
+    </nav>
+    <div id="live-banner" hidden></div>
+  </header>
+
+  <main id="feed"></main>
+  <div id="sentinel">Loading…</div>
+
+  <script src="clonernews.js" defer></script>
+</body>
+</html>
