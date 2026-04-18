@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ClonerNews — объяснение проекта</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #1f2937;
+    --muted: #6b7280;
+    --accent: #ff6600;
+    --accent-soft: #fff3ea;
+    --code-bg: #1e293b;
+    --code-fg: #e2e8f0;
+    --code-comment: #64748b;
+    --code-keyword: #f472b6;
+    --code-string: #a7f3d0;
+    --code-fn: #93c5fd;
+    --border: #e5e7eb;
+    --card: #ffffff;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.65;
+  }
+
+  header {
+    background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%);
+    color: #fff;
+    padding: 48px 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  header h1 { margin: 0 0 8px; font-size: 2.4rem; letter-spacing: -0.02em; }
+  header p  { margin: 0; opacity: 0.95; font-size: 1.1rem; }
+
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+  }
+  .toc h2 { margin: 0 0 12px; font-size: 1rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc li { margin: 4px 0; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  h2 {
+    font-size: 1.6rem;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  h3 { font-size: 1.15rem; margin: 20px 0 10px; color: var(--fg); }
+  h2 .emoji { font-size: 1.5rem; margin-right: 8px; }
+
+  p { margin: 10px 0; }
+
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: var(--accent-soft);
+    color: #c2410c;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 18px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin: 14px 0;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+
+  .tok-kw   { color: #f472b6; }
+  .tok-str  { color: #a7f3d0; }
+  .tok-fn   { color: #93c5fd; }
+  .tok-com  { color: #64748b; font-style: italic; }
+  .tok-num  { color: #fbbf24; }
+  .tok-prop { color: #fde68a; }
+
+  ul { padding-left: 22px; }
+  li { margin: 6px 0; }
+  li strong { color: var(--accent); }
+
+  .callout {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 4px;
+    margin: 16px 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { background: #f9fafb; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; }
+
+  .diagram {
+    background: #0f172a;
+    color: #cbd5e1;
+    padding: 20px;
+    border-radius: 8px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 30px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .step-num {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 28px;
+    font-weight: 700;
+    margin-right: 10px;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ClonerNews</h1>
+  <p>Объяснение проекта шаг за шагом — от точки запуска до деталей реализации</p>
+</header>
+
+<main>
+
+<nav class="toc">
+  <h2>Содержание</h2>
+  <ol>
+    <li><a href="#start">Точка запуска</a></li>
+    <li><a href="#loadfeed">Загрузка ленты — <code>loadFeed</code></a></li>
+    <li><a href="#loadmore">Пагинация — <code>loadMore</code></a></li>
+    <li><a href="#fetch">Параллельная загрузка и кэш</a></li>
+    <li><a href="#render">Рендер поста — <code>renderPost</code></a></li>
+    <li><a href="#comments">Комментарии и рекурсия</a></li>
+    <li><a href="#scroll">Бесконечный скролл</a></li>
+    <li><a href="#live">Live-обновления</a></li>
+    <li><a href="#ui">UI-обработчики</a></li>
+    <li><a href="#flow">Итоговая схема</a></li>
+    <li><a href="#ideas">Ключевые идеи</a></li>
+  </ol>
+</nav>
+
+<section id="start">
+  <h2><span class="emoji">🚀</span>1. Точка запуска</h2>
+  <p>Скрипт подключён через <code>&lt;script src="clonernews.js" defer&gt;</code> — выполнится после парсинга DOM. Последние строки файла — точка входа:</p>
+  <pre><code><span class="tok-prop">window</span>.<span class="tok-fn">addEventListener</span>(<span class="tok-str">'scroll'</span>, onScroll, { passive: <span class="tok-kw">true</span> });
+<span class="tok-fn">setInterval</span>(pollLive, LIVE_MS);
+<span class="tok-fn">loadFeed</span>(<span class="tok-str">'newstories'</span>);</code></pre>
+  <p>При загрузке страницы:</p>
+  <ul>
+    <li><strong>Подписка на скролл</strong> — для ленивой подгрузки постов</li>
+    <li><strong>Таймер live-обновлений</strong> — проверка новых данных каждые 5 секунд</li>
+    <li><strong>Первая загрузка</strong> ленты "New"</li>
+  </ul>
+</section>
+
+<section id="loadfeed">
+  <h2><span class="emoji">📡</span>2. Загрузка ленты — <code>loadFeed</code></h2>
+  <pre><code><span class="tok-kw">async function</span> <span class="tok-fn">loadFeed</span>(feed) {
+  <span class="tok-kw">const</span> gen = ++state.gen;
+  <span class="tok-prop">Object</span>.<span class="tok-fn">assign</span>(state, { feed, cursor: <span class="tok-num">0</span>, loading: <span class="tok-kw">false</span>, ids: [] });
+  feedEl.innerHTML = <span class="tok-str">''</span>;
+  <span class="tok-kw">try</span> {
+    <span class="tok-kw">const</span> ids = <span class="tok-kw">await</span> <span class="tok-fn">fetchJson</span>(<span class="tok-str">`${feed}.json`</span>);
+    <span class="tok-kw">if</span> (gen !== state.gen) <span class="tok-kw">return</span>;
+    state.ids = ids || [];
+    <span class="tok-kw">await</span> <span class="tok-fn">loadMore</span>();
+  } <span class="tok-kw">catch</span> (err) { ... }
+}</code></pre>
+
+  <ul>
+    <li><code>++state.gen</code> — <strong>токен поколения</strong>. Защита от race condition: если юзер переключит вкладку, токен изменится и старая операция не отрендерит посты.</li>
+    <li><code>Object.assign</code> — сбрасываем состояние ленты одной строкой.</li>
+    <li><code>fetchJson('newstories.json')</code> — API возвращает массив id (до 500 штук), но только id, не сами посты.</li>
+    <li><code>loadMore()</code> — подгружаем первую страницу.</li>
+  </ul>
+</section>
+
+<section id="loadmore">
+  <h2><span class="emoji">📦</span>3. Пагинация — <code>loadMore</code></h2>
+  <pre><code><span class="tok-kw">async function</span> <span class="tok-fn">loadMore</span>() {
+  <span class="tok-kw">if</span> (state.loading || state.cursor &gt;= state.ids.length) <span class="tok-kw">return</span>;
+  state.loading = <span class="tok-kw">true</span>;
+  <span class="tok-kw">const</span> gen = state.gen;
+  <span class="tok-kw">const</span> slice = state.ids.<span class="tok-fn">slice</span>(state.cursor, state.cursor += PAGE_SIZE);
+  <span class="tok-kw">try</span> {
+    <span class="tok-kw">const</span> items = <span class="tok-kw">await</span> <span class="tok-fn">fetchAll</span>(slice);
+    <span class="tok-kw">if</span> (gen === state.gen) items.<span class="tok-fn">sort</span>(byNewest).<span class="tok-fn">forEach</span>(renderPost);
+  } <span class="tok-kw">finally</span> {
+    state.loading = <span class="tok-kw">false</span>;
+  }
+}</code></pre>
+
+  <ul>
+    <li><strong>Guard</strong> — не запускаться параллельно, не выходить за массив.</li>
+    <li><code>state.cursor += PAGE_SIZE</code> двигается <strong>до</strong> <code>await</code> — параллельный вызов не возьмёт те же id.</li>
+    <li><code>fetchAll</code> загружает 20 items параллельно.</li>
+    <li><strong>Сортировка</strong> newest→oldest и рендер.</li>
+    <li><code>finally</code> — <code>loading = false</code> даже при ошибке.</li>
+  </ul>
+</section>
+
+<section id="fetch">
+  <h2><span class="emoji">🔧</span>4. Параллельная загрузка и кэш</h2>
+  <pre><code><span class="tok-kw">async function</span> <span class="tok-fn">fetchAll</span>(ids) {
+  <span class="tok-kw">const</span> results = <span class="tok-kw">await</span> <span class="tok-prop">Promise</span>.<span class="tok-fn">allSettled</span>(ids.<span class="tok-fn">map</span>(fetchItem));
+  <span class="tok-kw">return</span> results.<span class="tok-fn">flatMap</span>(r =&gt; r.status === <span class="tok-str">'fulfilled'</span> &amp;&amp; r.value ? [r.value] : []);
+}
+
+<span class="tok-kw">function</span> <span class="tok-fn">fetchItem</span>(id) {
+  <span class="tok-kw">if</span> (!cache.<span class="tok-fn">has</span>(id)) {
+    cache.<span class="tok-fn">set</span>(id, <span class="tok-fn">fetchJson</span>(<span class="tok-str">`item/${id}.json`</span>).<span class="tok-fn">catch</span>(err =&gt; {
+      cache.<span class="tok-fn">delete</span>(id);
+      <span class="tok-kw">throw</span> err;
+    }));
+  }
+  <span class="tok-kw">return</span> cache.<span class="tok-fn">get</span>(id);
+}</code></pre>
+
+  <ul>
+    <li><code>Promise.allSettled</code> — ждёт все запросы, даже упавшие (<code>Promise.all</code> сломал бы весь батч из-за одной ошибки).</li>
+    <li><code>flatMap</code> — одним проходом фильтрует успешные и извлекает значение.</li>
+    <li><strong>Кэш на <code>Map</code></strong> — один id не грузится дважды.</li>
+    <li>При ошибке промис удаляется из кэша → следующий вызов попробует заново.</li>
+  </ul>
+</section>
+
+<section id="render">
+  <h2><span class="emoji">🎨</span>5. Рендер поста — <code>renderPost</code></h2>
+  <pre><code><span class="tok-kw">function</span> <span class="tok-fn">renderPost</span>(item) {
+  <span class="tok-kw">const</span> url = <span class="tok-fn">safeUrl</span>(item.url);
+  <span class="tok-kw">const</span> title = item.title || <span class="tok-str">'(no title)'</span>;
+  <span class="tok-kw">const</span> titleHtml = url
+    ? <span class="tok-str">`&lt;a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"&gt;${title}&lt;/a&gt;`</span>
+    : title;
+
+  <span class="tok-kw">const</span> el = <span class="tok-prop">document</span>.<span class="tok-fn">createElement</span>(<span class="tok-str">'article'</span>);
+  el.innerHTML = <span class="tok-str">`&lt;h2&gt;${titleHtml}&lt;/h2&gt;...`</span>;
+
+  <span class="tok-kw">if</span> (item.parts) <span class="tok-fn">renderPolls</span>(...);
+  el.<span class="tok-fn">querySelector</span>(<span class="tok-str">'.show-comments'</span>)?.<span class="tok-fn">addEventListener</span>(...);
+  feedEl.<span class="tok-fn">appendChild</span>(el);
+}</code></pre>
+
+  <ul>
+    <li><code>safeUrl</code> — валидирует протокол, блокирует <code>javascript:</code> URL.</li>
+    <li><code>escapeHtml</code> — экранирует <code>by</code>, <code>type</code>, URL → защита от XSS.</li>
+    <li>Если <code>item.parts</code> (это poll) → <code>renderPolls</code>.</li>
+    <li>Если <code>item.kids</code> — привязываем клик для раскрытия комментариев.</li>
+  </ul>
+
+  <div class="callout">
+    <strong>Типы постов:</strong> все они — просто "items" в HN API. Различаются полями: <code>url</code> у story, <code>text</code> у job/ask, <code>parts</code> у poll, <code>kids</code> у чего угодно с комментариями. Код обрабатывает каждое поле опционально.
+  </div>
+</section>
+
+<section id="comments">
+  <h2><span class="emoji">💬</span>6. Комментарии и рекурсия</h2>
+  <pre><code><span class="tok-kw">async function</span> <span class="tok-fn">toggleComments</span>(postEl, kidIds) {
+  <span class="tok-kw">const</span> box = postEl.<span class="tok-fn">querySelector</span>(<span class="tok-str">'.comments'</span>);
+  <span class="tok-kw">if</span> (!box.hidden) { box.hidden = <span class="tok-kw">true</span>; <span class="tok-kw">return</span>; }
+  box.hidden = <span class="tok-kw">false</span>;
+  <span class="tok-kw">if</span> (opened.<span class="tok-fn">has</span>(box)) <span class="tok-kw">return</span>;
+  opened.<span class="tok-fn">add</span>(box);
+  ...
+  <span class="tok-kw">await</span> <span class="tok-fn">renderKids</span>(box, kidIds);
+}</code></pre>
+
+  <ul>
+    <li><strong>Toggle</strong>: открыто — скрыть, скрыто — показать.</li>
+    <li><code>WeakSet</code> <code>opened</code> запоминает загруженные блоки — повторно не грузим.</li>
+  </ul>
+
+  <pre><code><span class="tok-kw">async function</span> <span class="tok-fn">renderKids</span>(container, ids) {
+  <span class="tok-kw">const</span> kids = (<span class="tok-kw">await</span> <span class="tok-fn">fetchAll</span>(ids))
+    .<span class="tok-fn">filter</span>(c =&gt; !c.deleted &amp;&amp; !c.dead)
+    .<span class="tok-fn">sort</span>(byNewest);
+
+  <span class="tok-kw">for</span> (<span class="tok-kw">const</span> c <span class="tok-kw">of</span> kids) {
+    <span class="tok-com">// создать div комментария</span>
+    <span class="tok-kw">if</span> (c.kids?.length) {
+      <span class="tok-fn">renderKids</span>(nest, c.kids).<span class="tok-fn">catch</span>(() =&gt; {});  <span class="tok-com">// ← рекурсия</span>
+    }
+  }
+}</code></pre>
+
+  <p><strong>Рекурсия</strong> для вложенных комментариев любой глубины. База рекурсии — пустой <code>c.kids</code>.</p>
+</section>
+
+<section id="scroll">
+  <h2><span class="emoji">🔄</span>7. Бесконечный скролл</h2>
+  <pre><code><span class="tok-kw">const</span> onScroll = <span class="tok-fn">debounce</span>(() =&gt; {
+  <span class="tok-kw">if</span> (sentinelEl.<span class="tok-fn">getBoundingClientRect</span>().top &lt; <span class="tok-prop">window</span>.innerHeight + SCROLL_BUFFER) <span class="tok-fn">loadMore</span>();
+}, SCROLL_MS);</code></pre>
+
+  <ul>
+    <li><strong>debounce 150ms</strong> — не реагирует на каждый пиксель скролла.</li>
+    <li><code>#sentinel</code> — элемент-маркер внизу страницы. Когда он в пределах 200px от низа viewport — грузим следующую страницу.</li>
+    <li><code>{ passive: true }</code> — браузер знает, что обработчик не вызовет <code>preventDefault</code>, может скроллить плавнее.</li>
+  </ul>
+</section>
+
+<section id="live">
+  <h2><span class="emoji">⏱</span>8. Live-обновления — <code>pollLive</code></h2>
+  <pre><code><span class="tok-kw">async function</span> <span class="tok-fn">pollLive</span>() {
+  <span class="tok-kw">try</span> {
+    <span class="tok-kw">const</span> max = <span class="tok-kw">await</span> <span class="tok-fn">fetchJson</span>(<span class="tok-str">'maxitem.json'</span>);
+    <span class="tok-kw">if</span> (!state.seenMax) { state.seenMax = max; <span class="tok-kw">return</span>; }
+    <span class="tok-kw">if</span> (max &gt; state.seenMax) {
+      <span class="tok-kw">const</span> n = max - state.seenMax;
+      bannerEl.hidden = <span class="tok-kw">false</span>;
+      bannerEl.textContent = <span class="tok-str">`${n} new item${n === 1 ? '' : 's'} — click to refresh`</span>;
+    }
+  } <span class="tok-kw">catch</span> { <span class="tok-com">/* retry next tick */</span> }
+}</code></pre>
+
+  <ul>
+    <li>Каждые 5 сек запрос <code>/maxitem</code> — это <strong>id</strong> последнего элемента на HN.</li>
+    <li><strong>Первый тик</strong> — запоминаем baseline <code>seenMax</code>.</li>
+    <li><strong>Далее</strong> — если <code>max</code> вырос, показываем баннер с количеством новых элементов.</li>
+    <li><code>catch</code> без действия — сеть мигнула, через 5 сек попробуем снова.</li>
+  </ul>
+</section>
+
+<section id="ui">
+  <h2><span class="emoji">🎛</span>9. UI-обработчики</h2>
+  <pre><code>bannerEl.<span class="tok-fn">addEventListener</span>(<span class="tok-str">'click'</span>, () =&gt; {
+  bannerEl.hidden = <span class="tok-kw">true</span>;
+  state.seenMax = <span class="tok-num">0</span>;
+  <span class="tok-fn">loadFeed</span>(state.feed);
+});
+
+navEl.<span class="tok-fn">addEventListener</span>(<span class="tok-str">'click'</span>, (e) =&gt; {
+  <span class="tok-kw">const</span> btn = e.target.<span class="tok-fn">closest</span>(<span class="tok-str">'button[data-feed]'</span>);
+  <span class="tok-kw">if</span> (!btn) <span class="tok-kw">return</span>;
+  navEl.<span class="tok-fn">querySelectorAll</span>(<span class="tok-str">'button'</span>).<span class="tok-fn">forEach</span>(x =&gt; x.classList.<span class="tok-fn">toggle</span>(<span class="tok-str">'active'</span>, x === btn));
+  <span class="tok-fn">loadFeed</span>(btn.dataset.feed);
+});</code></pre>
+
+  <ul>
+    <li><strong>Клик по баннеру</strong> → перезагрузка текущей ленты с нуля.</li>
+    <li><strong>Event delegation</strong> на <code>&lt;nav&gt;</code> — один listener вместо пяти. <code>closest('button[data-feed]')</code> находит кнопку независимо от того, куда кликнули внутри неё.</li>
+  </ul>
+</section>
+
+<section id="flow">
+  <h2><span class="emoji">🗺</span>10. Итоговая схема потока</h2>
+  <div class="diagram">defer script loaded → DOM ready
+        │
+        ├── addEventListener('scroll') → onScroll (debounce 150ms)
+        │         └── rect близко к низу? → loadMore()
+        │
+        ├── setInterval(pollLive, 5000)
+        │         └── fetchJson('maxitem.json')
+        │               └── max > seenMax? → показать #live-banner
+        │
+        └── loadFeed('newstories')
+              │
+              ├── fetchJson('newstories.json') → [id, id, id, ...]
+              │
+              └── loadMore()
+                    │
+                    └── fetchAll(slice of 20 ids)
+                          │    └── cache + Promise.allSettled
+                          │
+                          └── sort(byNewest) → forEach renderPost
+                                │
+                                ├── safeUrl + escapeHtml → &lt;article&gt;
+                                ├── item.parts → renderPolls
+                                └── click "Show comments" → toggleComments
+                                                                 │
+                                                                 └── renderKids(kids)
+                                                                       └── (рекурсия на c.kids)</div>
+</section>
+
+<section id="ideas">
+  <h2><span class="emoji">💡</span>11. Ключевые идеи</h2>
+  <table>
+    <thead>
+      <tr><th>Идея</th><th>Как реализовано</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Ленивая загрузка</strong></td><td>Только 20 постов за раз, курсор + скролл-триггер</td></tr>
+      <tr><td><strong>Кэш запросов</strong></td><td><code>Map</code> по id — один id не грузится дважды</td></tr>
+      <tr><td><strong>Защита от race condition</strong></td><td><code>state.gen</code> — старые операции отбрасываются при смене ленты</td></tr>
+      <tr><td><strong>Устойчивость к ошибкам</strong></td><td><code>Promise.allSettled</code> + <code>try/catch</code> везде</td></tr>
+      <tr><td><strong>Безопасность</strong></td><td><code>escapeHtml</code> + <code>safeUrl</code> → защита от XSS</td></tr>
+      <tr><td><strong>Минимум запросов</strong></td><td>debounce на скролле + кэш + пагинация</td></tr>
+      <tr><td><strong>Live-обновления</strong></td><td>1 запрос в 5 секунд, баннер при новых данных</td></tr>
+      <tr><td><strong>Вложенные комментарии</strong></td><td>Рекурсия <code>renderKids</code> с базой на <code>!c.kids</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer>ClonerNews · объяснение проекта</footer>
+
+</body>
+</html>
